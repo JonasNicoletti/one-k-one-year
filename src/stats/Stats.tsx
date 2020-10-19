@@ -12,11 +12,10 @@ type StatsProp = {
 };
 
 const Stats: FunctionComponent<StatsProp> = ({ startDate, activities }) => {
-  const endDate = _.maxBy(activities, (act) => act.start_date_local)
-    ?.start_date_local;
+
   const dataSet = {
     datasets: [
-      getGoalDataSet(startDate, endDate),
+      getGoalDataSet(startDate),
       getResultDataSet(startDate, activities),
     ],
   };

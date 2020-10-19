@@ -29,8 +29,8 @@ export function daysBeetween2Days(day1: Date, day2: Date) {
   return Math.floor((utc2 - utc1) / Constants.MS_PER_DAY);
 }
 
-export function getGoalDataSet(startDate: Date, endDate: Date | undefined) {
-    const endingDate = endDate !== undefined ? addDays(new Date(endDate), 7) : new Date(new Date(+startDate).setFullYear(startDate.getFullYear() + 1));
+export function getGoalDataSet(startDate: Date) {
+    const endingDate = addDays(new Date(), 7)
 
     var goal = 0;
     const goal_step = 1000.0 / 366
@@ -59,14 +59,16 @@ export function getGoalDataSet(startDate: Date, endDate: Date | undefined) {
 }
 export function getResultDataSet(startDate: Date, activites: Activity[]) {
     var total_distance = 0;
-    
-    const data = getArrayOfDaysBeetweenDates(startDate, new Date()).map(day => {
-        const act = activites.find(act => isSameDay(day, new Date(act.start_date_local)))
-        if (act !== undefined) {
-            total_distance += ((+act.distance) / 1000.0)
-            return { x: day, y: total_distance.toFixed(2) }
-        }
-    }).filter(el => el != null);
+
+    const data = getArrayOfDaysBeetweenDates(startDate, new Date())
+        .map( (day) => {
+            const act = activites.find(act => isSameDay(day, new Date(act.start_date_local)));
+            if (act !== undefined) {
+                total_distance += ((+act.distance) / 1000.0);
+                return { x: day, y: total_distance.toFixed(2) };
+            }
+            return null;
+        }).filter(el => el != null);
     data.push({x: new Date(), y: total_distance.toFixed(2)})
 
     return {
