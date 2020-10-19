@@ -1,26 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import useCookies from "react-cookie/es6/useCookies";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import "./App.css";
+import Home from "./home/Home";
+import LoginCallBack from "./login-callback/LoginCallback";
+import Login from "./login/Login";
+import Constants from "./utils/constants";
 
-function App() {
+export default function App() {
+  const [cookies] = useCookies([Constants.COOKIE_STRAVA_USER]);
+  let routes = [
+    <Route path="/loginCallback" component={LoginCallBack} key={1}/>,
+    <Route path="/" component={Login} key={2}/>,
+  ];
+  if (cookies[Constants.COOKIE_STRAVA_USER]) {
+    routes = [
+      <Route path="/login" component={Login} key={1} />,
+      <Route path="/loginCallback" component={LoginCallBack} key={2}/>,
+      <Route path="/" component={Home} key={3}/>,
+    ];
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Switch>{routes}</Switch>
+    </Router>
   );
 }
-
-export default App;
