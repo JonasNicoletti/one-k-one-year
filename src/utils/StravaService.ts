@@ -19,7 +19,7 @@ export default class StravaService {
         client_ID: "54089",
         client_secret: "9ea9f280531fb5873686c0d66885022308a80d39",
         access_token: "",
-        redirect_uri: "http://f2c598595991.ngrok.io/loginCallback"
+        redirect_uri: "https://one-k-one-year.herokuapp.com/loginCallback"
     };
     BASE_ARGS: BaseArgs;
     ACTIVITIES_ARGS: ActivitiesArgs
