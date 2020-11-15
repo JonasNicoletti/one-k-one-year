@@ -1,6 +1,6 @@
 import Container from "@material-ui/core/Container";
 import Box from "@material-ui/core/Box";
-import React, { useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import "./Home.css";
 import {
   AppBar,
@@ -12,17 +12,16 @@ import {
   Toolbar,
   Typography,
 } from "@material-ui/core";
-import StravaService from "../utils/StravaService";
-import { Activity } from "../utils/models";
-import WhiteTextTypography from "../ui/WhiteTextTypograpfy";
+import WhiteTextTypography from "../../ui/WhiteTextTypograpfy";
 import useCookies from "react-cookie/es6/useCookies";
-import Constants from "../utils/constants";
-import LinearProgressWithLabel from "../ui/LinerProgressWithLabel";
+import Constants from "../../utils/constants";
+import LinearProgressWithLabel from "../../ui/LinerProgressWithLabel";
 import Activities from "../activities/Activities";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import CalendarCustomInput from "../ui/CalendarCustomInput";
+import CalendarCustomInput from "../../ui/CalendarCustomInput";
 import Stats from "../stats/Stats";
+import { useUser } from "../../context/UserProvider";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,47 +40,35 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function Home() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [totalKms, setTotalKms] = useState(1000);
-  const [loading, setLoading] = useState(true);
-  const [cookies, setCookie, removeCookie] = useCookies([
+type HomeProps = {
+  isDemo: boolean;
+};
+
+const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
+  var {
+    activities,
+    mockedActivities,
+    startingDate,
+    saveStartingDate,
+  } = useUser();
+  const [cookies, , removeCookie] = useCookies([
     Constants.COOKIE_STRAVA_USER,
     Constants.COOKIE_STARTING_DATE,
   ]);
 
   const classes = useStyles();
-  useEffect(() => {
-    const fetchActivities = async () => {
-      if (cookies[Constants.COOKIE_STARTING_DATE] === undefined) {
-        setCookie(
-          Constants.COOKIE_STARTING_DATE,
-          new Date(new Date().getFullYear(), 0, 1)
-        );
-      }
-      const stravaService = new StravaService(
-        cookies[Constants.COOKIE_STRAVA_USER],
-        new Date(cookies[Constants.COOKIE_STARTING_DATE])
-      );
-      try {
-        const data = await stravaService.getActivities();
-        setActivities(data);
-        setTotalKms(data.reduce((a, c) => a - +c.distance, 1000000) / 1000);
-      } catch (e) {
-        setActivities([]);
-        setTotalKms(1000);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchActivities();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cookies]);
 
-  const selectedDate =
-    cookies[Constants.COOKIE_STARTING_DATE] !== undefined
-      ? new Date(cookies[Constants.COOKIE_STARTING_DATE])
-      : new Date(new Date().getFullYear(), 0, 1);
+  if (isDemo && mockedActivities) {
+    activities = mockedActivities;
+    startingDate =
+      mockedActivities[mockedActivities.length - 1]?.start_date_local;
+  }
+
+  let totalKms = 1000;
+  if (activities) {
+    totalKms = activities.reduce((acc, act) => acc + +act.distance, 0) / 1000.0;
+  }
+
   return (
     <div>
       <AppBar position="static">
@@ -89,10 +76,11 @@ function Home() {
           <DatePicker
             dateFormat="dd/MM/yyyy"
             maxDate={new Date()}
-            selected={selectedDate}
-            onChange={(date: Date) =>
-              setCookie(Constants.COOKIE_STARTING_DATE, date)
-            }
+            selected={startingDate}
+            onChange={(date: Date) => {
+              startingDate = date;
+              saveStartingDate(date, isDemo);
+            }}
             customInput={React.createElement(CalendarCustomInput)}
           />
           <Typography variant="h6" color="inherit" className={classes.title}>
@@ -106,10 +94,14 @@ function Home() {
             >
               Logout
             </Button>
-          ) : null}
+          ) : (
+            <Button color="inherit" onClick={() => window.location.href = '/login'}>
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
-      {loading ? null : (
+      {!activities ? null : (
         <Container>
           <Box my={6}>
             <div className={classes.subTitle}>
@@ -119,7 +111,7 @@ function Home() {
                 color="secondary"
                 display="inline"
               >
-                {totalKms.toFixed(2)} km&nbsp;
+                {(1000.0 - totalKms).toFixed(2)} km&nbsp;
               </Typography>
               <WhiteTextTypography variant="h1" align="center" display="inline">
                 to go
@@ -128,7 +120,7 @@ function Home() {
             <div>
               <LinearProgressWithLabel
                 className={classes.progressBar}
-                value={100 - (totalKms * 100.0) / 1000.0}
+                value={(totalKms * 100.0) / 1000.0}
               />
             </div>
             <Grid container justify="center" spacing={2}>
@@ -136,7 +128,7 @@ function Home() {
                 <Activities activities={activities} />
               </Grid>
               <Grid item xs={6}>
-                <Stats startDate={selectedDate} activities={activities} />
+                <Stats startDate={startingDate} activities={activities} />
               </Grid>
             </Grid>
           </Box>
@@ -144,6 +136,6 @@ function Home() {
       )}
     </div>
   );
-}
+};
 
 export default Home;

@@ -1,15 +1,17 @@
-import { Button, Grid } from "@material-ui/core";
+import { Button, Grid, Link } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import StravaService from "../utils/StravaService";
+import { Redirect } from "react-router-dom";
+import { getLoginUrl } from "../../utils/AuthClient";
 import "./Login.css";
 
 export default function Login() {
   const [loginUrl, setLoginUrl] = useState("");
+  const [goToDemo, setGoToDemo] = useState(false);
 
   useEffect(() => {
     const fetchLoginUrl = async () => {
       try {
-        const data = await StravaService.getLoginUrl();
+        const data = await getLoginUrl();
         setLoginUrl(data);
       } catch (e) {
         console.log(e);
@@ -18,6 +20,9 @@ export default function Login() {
     fetchLoginUrl();
   }, []);
 
+  if (goToDemo) {
+    return <Redirect to='/demo'/>
+  }
   return (
     <Grid
       container
@@ -35,7 +40,17 @@ export default function Login() {
         >
           Login with Strava
         </Button>
+
       </Grid>
+      <Link
+          component="button"
+          color="secondary"
+          onClick={() => {
+            setGoToDemo(true);
+          }}
+        >
+          Go to Demo
+        </Link>
     </Grid>
   );
 }

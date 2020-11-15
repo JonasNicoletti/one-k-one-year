@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import React from "react";
 import { FunctionComponent } from "react";
-import WhiteTextTypography from "../ui/WhiteTextTypograpfy";
+import WhiteTextTypography from "../../ui/WhiteTextTypograpfy";
 
 type StatsEntryProp = {
   statName: string;

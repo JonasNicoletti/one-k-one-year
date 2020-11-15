@@ -1,25 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as QueryString from "query-string";
-import StravaService from "../utils/StravaService";
 import { Redirect } from "react-router-dom";
-import useCookies from "react-cookie/es6/useCookies";
-import Constants from "../utils/constants";
+import { saveToken } from "../utils/AuthClient";
 
 export default function LoginCallBack(props: { location: { search: string } }) {
-  const [cookies, setCookie] = useCookies([Constants.COOKIE_STRAVA_USER]);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const params = QueryString.parse(props.location.search);
 
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const success = await StravaService.saveToken(params.code as string);
-        setCookie(Constants.COOKIE_STRAVA_USER, success);
+        setLoggedIn(await saveToken(params.code as string))
       } catch (e) {
         console.log(e);
       }
     };
     fetchToken();
-  }, [params.code, setCookie]);
-  return cookies ? <Redirect to="/" /> : <div></div>;
+  }, [params.code]);
+  return loggedIn ? <Redirect to="/" /> : <div></div>;
 }

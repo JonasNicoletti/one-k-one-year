@@ -12,6 +12,10 @@ function getArrayOfDaysBeetweenDates(from: Date, to: Date): Date[] {
     return dateArray;
 }
 
+export function randomNumber(min: number, max: number): number {  
+    return Math.ceil(Math.random() * (max - min) + min); 
+}  
+
 function addDays(date: Date, days: number): Date {
     var newDate = new Date(date.valueOf());
     newDate.setDate(date.getDate() + days);
