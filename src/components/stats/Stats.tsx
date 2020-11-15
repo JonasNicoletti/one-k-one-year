@@ -68,9 +68,10 @@ const Stats: FunctionComponent<StatsProp> = ({ startDate, activities }) => {
   const avgKmWeekResult = (totalMetersRun / 1000.0) / (dayPassend / 7)
 
   const totalTimeRunned = _.sumBy(activities, (act) => act.moving_time)
-  const totalHoursRunned =  totalTimeRunned / (60*60)
-  const totalMinutesRunned = (totalTimeRunned - (~~totalHoursRunned * 60 * 60)) / 60
-  const totalSecondsRunned = totalTimeRunned - (~~totalHoursRunned * 60* 60) - (~~totalMinutesRunned * 60)
+  const totalDaysRunned =  totalTimeRunned / (60*60*24)
+  const totalHoursRunned =  (totalTimeRunned - (~~totalDaysRunned * 60 * 60 * 24)) / (60*60)
+  const totalMinutesRunned = (totalTimeRunned - (~~totalDaysRunned * 60 * 60 * 24) - (~~totalHoursRunned * 60 * 60)) / 60
+  const totalSecondsRunned = totalTimeRunned -  (~~totalDaysRunned * 60 * 60 * 24) - (~~totalHoursRunned * 60* 60) - (~~totalMinutesRunned * 60)
 
   const totalDistancePerRun = (totalMetersRun / _activities.length) / 1000
 
@@ -83,7 +84,7 @@ const Stats: FunctionComponent<StatsProp> = ({ startDate, activities }) => {
       <Line data={dataSet} options={options} />
       <StatsEntry statName="" goalValue="GOAL" resultValue="RESULT" />
       <StatsEntry statName="Avg distance per week" goalValue={`${avgKmWeekGoal.toFixed(2)} km`} resultValue={`${avgKmWeekResult.toFixed(2)} km`} />
-      <StatsEntry statName="Total time run" goalValue={"-"} resultValue={`${~~totalHoursRunned}:${~~totalMinutesRunned}:${~~totalSecondsRunned}`} />
+      <StatsEntry statName="Total time run" goalValue={"-"} resultValue={`${~~totalDaysRunned}d ${~~totalHoursRunned}h ${~~totalMinutesRunned}m ${~~totalSecondsRunned}s`} />
       <StatsEntry statName="Avg distance per run" goalValue={"-"} resultValue={`${totalDistancePerRun.toFixed(2)} km`} />
       <StatsEntry statName="Runs left" statDescription="based on avg distance per run" goalValue={runsLeft.toString()} resultValue={_activities.length.toString()} />
     </div>
