@@ -1,6 +1,7 @@
 import Container from "@material-ui/core/Container";
 import Box from "@material-ui/core/Box";
-import React, { FunctionComponent } from "react";
+import { useState } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import "./Home.css";
 import {
   AppBar,
@@ -11,6 +12,7 @@ import {
   Theme,
   Toolbar,
   Typography,
+  CircularProgress,
 } from "@material-ui/core";
 import WhiteTextTypography from "../../ui/WhiteTextTypograpfy";
 import useCookies from "react-cookie/es6/useCookies";
@@ -22,6 +24,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import CalendarCustomInput from "../../ui/CalendarCustomInput";
 import Stats from "../stats/Stats";
 import { useUser } from "../../context/UserProvider";
+import { Activity } from "../../utils/models";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -46,7 +49,7 @@ type HomeProps = {
 
 const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
   var {
-    activities,
+    fetchActivities,
     mockedActivities,
     startingDate,
     saveStartingDate,
@@ -57,9 +60,21 @@ const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
   ]);
 
   const classes = useStyles();
+  const [activities, setActivities] = useState<Array<Activity>>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getActivites = async () => {
+      setLoading(true);
+      const fetchedAcivites = await fetchActivities();
+      setActivities(fetchedAcivites);
+      setLoading(false);
+    };
+    getActivites();
+  }, [startingDate, fetchActivities]);
 
   if (isDemo && mockedActivities) {
-    activities = mockedActivities;
+    setActivities(mockedActivities);
     startingDate =
       mockedActivities[mockedActivities.length - 1]?.start_date_local;
   }
@@ -95,13 +110,20 @@ const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
               Logout
             </Button>
           ) : (
-            <Button color="inherit" onClick={() => window.location.href = '/login'}>
+            <Button
+              color="inherit"
+              onClick={() => (window.location.href = "/login")}
+            >
               Login
             </Button>
           )}
         </Toolbar>
       </AppBar>
-      {!activities ? null : (
+      {loading ? (
+        <Grid container justify="center">
+          <CircularProgress />
+        </Grid>
+      ) : (
         <Container>
           <Box my={6}>
             <div className={classes.subTitle}>

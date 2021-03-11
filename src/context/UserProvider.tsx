@@ -1,6 +1,5 @@
 import React, { createContext, ReactNode, useContext } from "react";
 import { useState } from "react";
-import { useAsync } from "react-async";
 import {
   getActivities,
   getStartingDate,
@@ -12,7 +11,7 @@ import { useAuth } from "./AuthProvider";
 
 type UserContextProps = {
   user: StravaUser | undefined;
-  activities: Activity[] | undefined;
+  fetchActivities: Function;
   mockedActivities: Activity[] | undefined;
   startingDate: Date;
   saveStartingDate: Function;
@@ -21,7 +20,7 @@ type UserContextProps = {
 const UserContext = createContext<UserContextProps>({
   startingDate: new Date(),
   user: undefined,
-  activities: [],
+  fetchActivities: () => Promise.resolve([]),
   mockedActivities: [],
   saveStartingDate: () => {},
 });
@@ -32,24 +31,27 @@ type UserProviderProps = {
 
 function UserProvider(props: UserProviderProps) {
   const { user } = useAuth();
-  const { data: activities } = useAsync({ promiseFn: getActivities });
+
+  const fetchActivities = () => getActivities();
   const mockedData = getMockedActivities();
   const [startingDate, setStartingDate] = useState(getStartingDate());
 
   const saveStartingDate = (d: Date, isDemo: boolean) => {
+    if (!isDemo) {
+      storeStartingDate(d);
+    }
     setStartingDate(d);
-    if (isDemo) return;
-    storeStartingDate(d);
   };
 
   return (
     <UserContext.Provider
       value={{
         user: user,
-        activities: activities,
+        fetchActivities: fetchActivities,
         mockedActivities: mockedData,
         startingDate: startingDate,
-        saveStartingDate: (d: Date, isDemo: boolean) => saveStartingDate(d, isDemo),
+        saveStartingDate: (d: Date, isDemo: boolean) =>
+          saveStartingDate(d, isDemo),
       }}
       {...props}
     />

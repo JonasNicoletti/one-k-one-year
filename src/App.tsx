@@ -13,16 +13,12 @@ export default function App() {
   const [cookies] = useCookies([Constants.COOKIE_STRAVA_USER]);
   let routes = [
     <Route path="/loginCallback" component={LoginCallBack} key={1} />,
-    <Route path="/demo" render={() => <Home isDemo/>} key={2} />,
+    <Route path="/demo" render={() => <Home isDemo />} key={2} />,
     <Route path="/" component={Login} key={3} />,
   ];
   if (cookies[Constants.COOKIE_STRAVA_USER]) {
-    routes = [
-      <Route path="/login" component={Login} key={1} />,
-      <Route path="/loginCallback" component={LoginCallBack} key={2} />,
-      <Route path="/demo" render={() => <Home isDemo/>} key={3} />,
-      <Route path="/" component={Home} key={4} />,
-    ];
+    routes.unshift(<Route path="/login" component={Login} key={0} />);
+    routes[3] = <Route path="/" component={Home} key={4} />;
   }
   return (
     <AuthProvider>
