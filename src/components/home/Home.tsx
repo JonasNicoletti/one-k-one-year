@@ -48,12 +48,7 @@ type HomeProps = {
 };
 
 const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
-  var {
-    fetchActivities,
-    mockedActivities,
-    startingDate,
-    saveStartingDate,
-  } = useUser();
+  var { fetchActivities, startingDate, saveStartingDate } = useUser();
   const [cookies, , removeCookie] = useCookies([
     Constants.COOKIE_STRAVA_USER,
     Constants.COOKIE_STARTING_DATE,
@@ -66,18 +61,12 @@ const Home: FunctionComponent<HomeProps> = ({ isDemo }) => {
   useEffect(() => {
     const getActivites = async () => {
       setLoading(true);
-      const fetchedAcivites = await fetchActivities();
+      const fetchedAcivites = await fetchActivities(isDemo);
       setActivities(fetchedAcivites);
       setLoading(false);
     };
     getActivites();
-  }, [startingDate, fetchActivities]);
-
-  if (isDemo && mockedActivities) {
-    setActivities(mockedActivities);
-    startingDate =
-      mockedActivities[mockedActivities.length - 1]?.start_date_local;
-  }
+  }, [startingDate, fetchActivities, isDemo]);
 
   let totalKms = 1000;
   if (activities) {

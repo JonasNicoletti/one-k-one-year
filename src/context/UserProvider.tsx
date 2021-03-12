@@ -6,13 +6,12 @@ import {
   storeStartingDate,
   getMockedActivities,
 } from "../utils/AuthClient";
-import { Activity, StravaUser } from "../utils/models";
+import { StravaUser } from "../utils/models";
 import { useAuth } from "./AuthProvider";
 
 type UserContextProps = {
   user: StravaUser | undefined;
   fetchActivities: Function;
-  mockedActivities: Activity[] | undefined;
   startingDate: Date;
   saveStartingDate: Function;
 };
@@ -21,7 +20,6 @@ const UserContext = createContext<UserContextProps>({
   startingDate: new Date(),
   user: undefined,
   fetchActivities: () => Promise.resolve([]),
-  mockedActivities: [],
   saveStartingDate: () => {},
 });
 
@@ -32,8 +30,7 @@ type UserProviderProps = {
 function UserProvider(props: UserProviderProps) {
   const { user } = useAuth();
 
-  const fetchActivities = () => getActivities();
-  const mockedData = getMockedActivities();
+  const fetchActivities = (isDemo: boolean) => isDemo ? getMockedActivities() : getActivities();
   const [startingDate, setStartingDate] = useState(getStartingDate());
 
   const saveStartingDate = (d: Date, isDemo: boolean) => {
@@ -48,7 +45,6 @@ function UserProvider(props: UserProviderProps) {
       value={{
         user: user,
         fetchActivities: fetchActivities,
-        mockedActivities: mockedData,
         startingDate: startingDate,
         saveStartingDate: (d: Date, isDemo: boolean) =>
           saveStartingDate(d, isDemo),
